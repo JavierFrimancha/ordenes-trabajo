@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Gestión de Órdenes de Trabajo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind -->
+  <!-- ✅ Tailwind correctamente cargado -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -17,7 +17,7 @@
     🛠️ Gestión de Órdenes de Trabajo
   </h1>
 
-  <!-- Botonera -->
+  <!-- BOTONERA -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <button class="menu-btn" onclick="vistaNueva()">➕ Nueva</button>
     <button class="menu-btn" onclick="vistaConsulta()">🔍 Consulta</button>
@@ -25,11 +25,9 @@
     <button class="menu-btn" onclick="vistaHistorico()">📜 Histórico</button>
   </div>
 
-  <!-- Contenido -->
+  <!-- CONTENIDO -->
   <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
-    <p class="text-center text-gray-400">
-      Selecciona una opción del menú
-    </p>
+    <p class="text-center text-gray-400">Selecciona una opción del menú</p>
   </div>
 
 </div>
@@ -37,10 +35,12 @@
 <script>
 /* ================= CONFIG ================= */
 
-// ✅ PON AQUÍ TU URL REAL DE APPS SCRIPT
-const API_URL = "https://script.google.com/macros/s/AKfycbxKb6HMxO4tvf8KyvL5Zqj9p6LuawymwPm_WeY_1zCRuiAxIJwnME6mYRLPW9RLgPA9/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxKb6HMxO4tvf8KyvL5Zqj9p6LuawymwPm_WeY_1zCRuiAxIJwnME6mYRLPW9RLgPA9/exec";
 
-/* ================= UTILIDADES ================= */
+const vista = document.getElementById("vista");
+
+/* ================= API ================= */
 
 async function apiGet(query) {
   const res = await fetch(`${API_URL}?${query}`);
@@ -56,43 +56,41 @@ async function apiPost(data) {
   return res.json();
 }
 
-const vista = document.getElementById("vista");
-
 /* ================= VISTAS ================= */
 
-async function vistaNueva() {
+function vistaNueva() {
   vista.innerHTML = `
     <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
 
     <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
 
       <div>
-        <label class="block text-sm font-semibold mb-1">Nombre</label>
+        <label class="font-semibold text-sm">Nombre</label>
         <input id="nombre" required class="input">
       </div>
 
       <div>
-        <label class="block text-sm font-semibold mb-1">Lugar</label>
-        <select id="lugar" class="input">
-          <option>Sala 1</option>
-          <option>Sala 2</option>
-          <option>Oficina</option>
-          <option>Almacén</option>
-        </select>
+        <label class="font-semibold text-sm">Lugar</label>
+        <input id="lugar" class="input">
       </div>
 
       <div class="md:col-span-2">
-        <label class="block text-sm font-semibold mb-1">Deficiencia</label>
-        <select id="deficiencia" class="input">
-          <option>Iluminación</option>
-          <option>Humedad</option>
-          <option>Rotura</option>
-          <option>Fuga</option>
-        </select>
+        <label class="font-semibold text-sm">Observaciones lugar</label>
+        <input id="observaciones_lugar" class="input">
       </div>
 
       <div>
-        <label class="block text-sm font-semibold mb-1">Estado</label>
+        <label class="font-semibold text-sm">Deficiencia</label>
+        <input id="deficiencia" class="input">
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="font-semibold text-sm">Observaciones deficiencia</label>
+        <input id="observaciones_deficiencias" class="input">
+      </div>
+
+      <div>
+        <label class="font-semibold text-sm">Estado</label>
         <select id="estado" class="input">
           <option>Pendiente</option>
           <option>Realizada</option>
@@ -114,7 +112,9 @@ async function guardarOrden(e) {
     accion: "crear",
     nombre: nombre.value,
     lugar: lugar.value,
+    observaciones_lugar: observaciones_lugar.value,
     deficiencia: deficiencia.value,
+    observaciones_deficiencias: observaciones_deficiencias.value,
     estado: estado.value
   });
 
@@ -156,9 +156,13 @@ async function vistaHistorico() {
 
 function vistaConsulta() {
   vista.innerHTML = `
-    <p class="text-gray-600">La consulta individual la añadimos en el siguiente paso.</p>
+    <p class="text-gray-600">
+      🔍 Consulta individual por número (siguiente paso).
+    </p>
   `;
 }
+
+/* ================= RENDER ================= */
 
 function pintarOrden(o) {
   return `
@@ -166,7 +170,9 @@ function pintarOrden(o) {
       <p class="font-bold">🧾 Orden ${o.orden}</p>
       <p>👤 ${o.nombre}</p>
       <p>📍 ${o.lugar}</p>
+      <p>📝 ${o.observaciones_lugar || "-"}</p>
       <p>⚠️ ${o.deficiencia}</p>
+      <p>📝 ${o.observaciones_deficiencias || "-"}</p>
       <p><em>${o.estado}</em></p>
     </div>
   `;
