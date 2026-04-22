@@ -2,22 +2,36 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Prueba JS</title>
+  <title>Prueba Tailwind</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ✅ Tailwind correctamente cargado -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
 
-<h1>Prueba JavaScript</h1>
+  <div class="bg-white rounded-xl shadow-xl p-8 text-center">
+    <h1 class="text-2xl font-bold text-indigo-700 mb-4">
+      ✅ Tailwind activo
+    </h1>
 
-<button onclick="saludar()">Botón de prueba</button>
+    <button
+      onclick="probar()"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+    >
+      Botón de prueba
+    </button>
 
-<div id="salida"></div>
+    <div id="resultado" class="mt-4 text-green-600 font-bold"></div>
+  </div>
 
-<script>
-function saludar() {
-  document.getElementById("salida").innerText = "✅ JavaScript funciona";
-}
-</script>
+  <script>
+    function probar() {
+      document.getElementById("resultado").innerText =
+        "✅ JavaScript + Tailwind funcionan";
+    }
+  </script>
 
 </body>
 </html>
