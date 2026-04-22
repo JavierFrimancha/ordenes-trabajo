@@ -59,57 +59,54 @@ async function apiPost(data) {
 /* ========= VISTAS ========= */
 
 async function vistaNueva() {
-  const lugares = await apiGet("accion=lugares");
-  const deficiencias = await apiGet("accion=deficiencias");
-
+  // 1. Pintamos algo SIEMPRE
   vista.innerHTML = `
     <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
-
-    <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
-
-      <div>
-        <label class="label">Nombre</label>
-        <input id="nombre" required class="input">
-      </div>
-
-      <div>
-        <label class="label">Lugar</label>
-        <select id="lugar" class="input">
-          ${lugares.map(l => `<option>${l}</option>`).join("")}
-        </select>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="label">Observaciones lugar</label>
-        <input id="observaciones_lugar" class="input">
-      </div>
-
-      <div>
-        <label class="label">Deficiencia</label>
-        <select id="deficiencia" class="input">
-          ${deficiencias.map(d => `<option>${d}</option>`).join("")}
-        </select>
-      </div>
-
-      <div class="md:col-span-2">
-        <label class="label">Observaciones deficiencia</label>
-        <input id="observaciones_deficiencias" class="input">
-      </div>
-
-      <div>
-        <label class="label">Estado</label>
-        <select id="estado" class="input">
-          <option>Pendiente</option>
-          <option>Realizada</option>
-        </select>
-      </div>
-
-      <div class="md:col-span-2">
-        <button class="btn w-full">Guardar orden</button>
-      </div>
-
-    </form>
+    <p class="text-gray-500">Cargando datos…</p>
   `;
+
+  try {
+    // 2. Cargamos datos externos
+    const lugares = await apiGet("accion=lugares");
+    const deficiencias = await apiGet("accion=deficiencias");
+
+    // 3. Pintamos el formulario real
+    vista.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
+
+      <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="label">Nombre</label>
+          <input id="nombre" required class="input">
+        </div>
+
+        <div>
+          <label class="label">Lugar</label>
+          <select id="lugar" class="input">
+            ${lugares.map(l => `<option>${l}</option>`).join("")}
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Deficiencia</label>
+          <select id="deficiencia" class="input">
+            ${deficiencias.map(d => `<option>${d}</option>`).join("")}
+          </select>
+        </div>
+
+        <button class="btn md:col-span-2">Guardar</button>
+      </form>
+    `;
+  } catch (err) {
+    // 4. Error visible (en vez de “no pasa nada”)
+    vista.innerHTML = `
+      <p class="text-red-600 font-bold">
+        ❌ Error cargando datos<br>
+        Revisa la conexión con Apps Script
+      </p>
+    `;
+    console.error(err);
+  }
 }
 
 async function guardarOrden(e) {
