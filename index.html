@@ -62,9 +62,9 @@ async function vistaNueva() {
     <form onsubmit="crearOrden(event)" class="grid gap-3 md:grid-cols-2">
       <input id="nombre" class="input" placeholder="Nombre">
       <select id="lugar" class="input">${lugares.map(x => `<option>${x}</option>`).join("")}</select>
-      <input id="obs_lugar" class="input" placeholder="Observaciones lugar">
+      <input id="observaciones_lugar" class="input" placeholder="Observaciones lugar">
       <select id="deficiencia" class="input">${def.map(x => `<option>${x}</option>`).join("")}</select>
-      <input id="obs_def" class="input" placeholder="Observaciones deficiencia">
+      <input id="observaciones_def" class="input" placeholder="Observaciones deficiencia">
       <select id="estado" class="input">
         <option>Pendiente</option>
         <option>Realizada</option>
@@ -80,9 +80,9 @@ async function crearOrden(e) {
     accion: "crear",
     nombre: nombre.value,
     lugar: lugar.value,
-    obs_lugar: obs_lugar.value,
+    observaciones_lugar: obs_lugar.value,
     deficiencia: deficiencia.value,
-    obs_deficiencia: obs_def.value,
+    observaciones_deficiencia: obs_def.value,
     estado: estado.value
   });
   vista.innerHTML = "<p class='text-green-600 font-bold'>✅ Orden creada. Nº " + r.orden + "</p>";
