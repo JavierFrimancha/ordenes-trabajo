@@ -2,36 +2,96 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Prueba Tailwind</title>
+  <title>Gestión de Órdenes de Trabajo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ✅ Tailwind correctamente cargado -->
+  <!-- ✅ Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
 
-  <div class="bg-white rounded-xl shadow-xl p-8 text-center">
-    <h1 class="text-2xl font-bold text-indigo-700 mb-4">
-      ✅ Tailwind activo
+  <div class="max-w-6xl mx-auto">
+
+    <!-- TÍTULO -->
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-indigo-700">
+      🛠️ Gestión de Órdenes de Trabajo
     </h1>
 
-    <button
-      onclick="probar()"
-      class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-    >
-      Botón de prueba
-    </button>
+    <!-- BOTONERA -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <button class="menu-btn" onclick="vistaNueva()">➕ Nueva</button>
+      <button class="menu-btn" onclick="vistaConsulta()">🔍 Consulta</button>
+      <button class="menu-btn" onclick="vistaPendientes()">⏳ Pendientes</button>
+      <button class="menu-btn" onclick="vistaHistorico()">📜 Histórico</button>
+    </div>
 
-    <div id="resultado" class="mt-4 text-green-600 font-bold"></div>
+    <!-- CONTENIDO CENTRAL -->
+    <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
+      <p class="text-gray-400 text-center">
+        Selecciona una opción del menú
+      </p>
+    </div>
+
   </div>
 
+  <!-- LOGICA JS BÁSICA -->
   <script>
-    function probar() {
-      document.getElementById("resultado").innerText =
-        "✅ JavaScript + Tailwind funcionan";
+    const vista = document.getElementById("vista");
+
+    function vistaNueva() {
+      vista.innerHTML = `
+        <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
+        <p class="text-gray-600">
+          Aquí irá el formulario de creación de órdenes.
+        </p>
+      `;
+    }
+
+    function vistaConsulta() {
+      vista.innerHTML = `
+        <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
+        <p class="text-gray-600">
+          Aquí se consultarán órdenes existentes.
+        </p>
+      `;
+    }
+
+    function vistaPendientes() {
+      vista.innerHTML = `
+        <h2 class="text-xl font-bold mb-4">⏳ Órdenes pendientes</h2>
+        <p class="text-gray-600">
+          Aquí aparecerá el listado de órdenes pendientes.
+        </p>
+      `;
+    }
+
+    function vistaHistorico() {
+      vista.innerHTML = `
+        <h2 class="text-xl font-bold mb-4">📜 Histórico</h2>
+        <p class="text-gray-600">
+          Aquí se mostrará el histórico de órdenes realizadas.
+        </p>
+      `;
     }
   </script>
+
+  <!-- ESTILOS AUXILIARES -->
+  <style>
+    .menu-btn {
+      background: white;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,.1);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .menu-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,.15);
+    }
+  </style>
 
 </body>
 </html>
