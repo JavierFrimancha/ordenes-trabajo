@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Gestión de Órdenes de Trabajo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+https://cdn.tailwindcss.com>
+
+<style>
+@media print {
+  body * { visibility: hidden; }
+  #vista, #vista * { visibility: visible; }
+  #vista { position: absolute; left: 0; top: 0; width: 100%; }
+}
+</style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+
+<div class="max-w-6xl mx-auto">
+  <h1 class="text-3xl font-bold text-center mb-8 text-indigo-700">
+    🛠️ Gestión de Órdenes de Trabajo
+  </h1>
+
+  <!-- MENÚ -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <button onclick="vistaNueva()" class="btn">➕ Nueva</button>
+    <button onclick="vistaConsulta()" class="btn">🔍 Consulta</button>
+    <button onclick="vistaLista('Pendiente')" class="btn">⏳ Pendientes</button>
+    <button onclick="vistaLista('Realizada')" class="btn">📜 Histórico</button>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div id="vista" class="bg-white rounded-xl shadow p-6 min-h-[350px]"></div>
+</div>
+
+<script>
+/* 🔧 CONFIG */
+const API_URL = "PEGA_AQUI_TU_URL_DE_WEB_APP";
+
+/* ===== HELPERS ===== */
+async function apiGet(params) {
+  const res = await fetch(`${API_URL}?${params}`);
+  return res.json();
+}
+
+async function apiPost(data) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
+
+function $(id) { return document.getElementById(id); }
+
+/* ===== NUEVA ORDEN ===== */
+async function vistaNueva() {
+  const lugares = await apiGet("accion=lugares");
+  const deficiencias = await apiGet("accion=deficiencias");
+
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
+    <form onsubmit="crear(event)" class="grid gap-3 md:grid-cols-2">
+      <input id="nombre" placeholder="Nombre" class="input">
+
+      <select id="lugar" class="input">
+        ${lugares.map(l => `<option>${l}</option>`).join("")}
+      </select>
+
+      <input id="obs_lugar" placeholder="Observaciones lugar" class="input">
+
+      <select id="deficiencia" class="input">
+        ${deficiencias.map(d => `<option>${d}</option>`).join("")}
+      </select>
+
+      <input id="obs_deficiencia" placeholder="Observaciones deficiencia" class="input">
+
+      <select id="estado" class="input">
+        <option>Pendiente</option>
+        <option>Realizada</option>
+      </select>
+
+      <button class="btn md:col-span-2">Guardar</button>
+    </form>`;
+}
+
+async function crear(e) {
+  e.preventDefault();
+  const r = await apiPost({
+    accion: "crear",
+    nombre: nombre.value,
+    lugar: lugar.value,
+    obs_lugar: obs_lugar.value,
+    deficiencia: deficiencia.value,
+    obs_deficiencia: obs_deficiencia.value,
+    estado: estado.value
+  });
+  vista.innerHTML = `✅ Orden creada con número <strong>${r.orden}</strong>`;
+}
+
+/* ===== CONSULTAR ===== */
+function vistaConsulta() {
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
+    <input id="buscar" class="input mb-3" placeholder="Nº de orden">
+    <button onclick="buscarOrden()" class="btn">Buscar</button>
+    <button onclick="window.print()" class="btn ml-2">🖨️ Imprimir</button>
+    <div id="resultado" class="mt-4"></div>`;
+}
+
+async function buscarOrden() {
+  const r = await apiGet(`accion=buscar&orden=${buscar.value}`);
+  resultado.innerHTML = r.error ? r.error : pintar(r, true);
+}
+
+/* ===== LISTAS ===== */
+async function vistaLista(estado) {
+  const datos = await apiGet("accion=listar");
+  const filtrado = datos.filter(o => o.estado === estado);
+
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">${estado}</h2>
+    <button onclick="window.print()" class="btn mb-4">🖨️ Imprimir listado</button>
+    ${filtrado.map(o => pintar(o)).join("") || "No hay datos"}
+  `;
+}
+
+/* ===== EDICIÓN ===== */
+async function editar(orden) {
+  const o = await apiGet(`accion=buscar&orden=${orden}`);
+  vista.innerHTML = `
+    <h2 class="font-bold mb-4">✏️ Editar orden ${orden}</h2>
+    <form onsubmit="guardarEdicion(event,'${orden}')" class="grid gap-3 md:grid-cols-2">
+      <input id="nombre" class="input" value="${o.nombre}">
+      <input id="lugar" class="input" value="${o.lugar}">
+      <input id="obs_lugar" class="input" value="${o.obs_lugar}">
+      <input id="deficiencia" class="input" value="${o.deficiencia}">
+      <input id="obs_deficiencia" class="input" value="${o.obs_deficiencia}">
+      <select id="estado" class="input">
+        <option ${o.estado==="Pendiente"?"selected":""}>Pendiente</option>
+        <option ${o.estado==="Realizada"?"selected":""}>Realizada</option>
+      </select>
+      <button class="btn md:col-span-2">Guardar cambios</button>
+    </form>`;
+}
+
+async function guardarEdicion(e, orden) {
+  e.preventDefault();
+  await apiPost({
+    accion: "editar",
+    orden,
+    nombre: nombre.value,
+    lugar: lugar.value,
+    obs_lugar: obs_lugar.value,
+    deficiencia: deficiencia.value,
+    obs_deficiencia: obs_deficiencia.value,
+    estado: estado.value
+  });
+  vista.innerHTML = "✅ Cambios guardados";
+}
+
+/* ===== RENDER ===== */
+function pintar(o, editable=false) {
+  return `
+  <div class="mb-4 p-4 bg-indigo-50 rounded border-l-4 border-indigo-600">
+    <p class="font-bold">🧾 Orden ${o.orden}</p>
+    <p>👤 ${o.nombre || "-"}</p>
+    <p>📍 ${o.lugar || "-"}</p>
+    <p>📝 ${o.obs_lugar || "-"}</p>
+    <p>⚠️ ${o.deficiencia || "-"}</p>
+    <p>💬 ${o.obs_deficiencia || "-"}</p>
+    <p><em>${o.estado}</em></p>
+    ${editable ? `<button onclick="editar('${o.orden}')" class="btn mt-2">✏️ Editar</button>` : ""}
+  </div>`;
+}
+</script>
+
+<style>
+.btn { background:#fff; padding:10px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.1) }
+.input { border:1px solid #ccc; padding:8px; border-radius:8px }
+</style>
+
+</body>
+</html>
