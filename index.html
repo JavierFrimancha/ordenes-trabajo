@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Gestión de Órdenes de Trabajo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- ✅ TAILWIND CORRECTO -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -24,7 +23,6 @@
     🛠️ Gestión de Órdenes de Trabajo
   </h1>
 
-  <!-- BOTONES PRINCIPALES -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
     <button onclick="vistaNueva()" class="card">➕ Nueva</button>
     <button onclick="vistaConsulta()" class="card">🔍 Consulta</button>
@@ -32,75 +30,53 @@
     <button onclick="vistaLista('Realizada')" class="card">📜 Histórico</button>
   </div>
 
-  <!-- CONTENEDOR -->
   <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
     <p class="text-center text-gray-400">Selecciona una opción</p>
   </div>
 </div>
 
 <script>
-/* ================= CONFIG ================= */
-
-// ✅ TU URL REAL DE APPS SCRIPT (YA VALIDA)
 const API_URL = "https://script.google.com/macros/s/AKfycbxKb6HMxO4tvf8KyvL5Zqj9p6LuawymwPm_WeY_1zCRuiAxIJwnME6mYRLPW9RLgPA9/exec";
-
-// ✅ VARIABLE CRÍTICA (ANTES FALTABA)
 const vista = document.getElementById("vista");
 
-/* ================= HELPERS ================= */
-
-async function apiGet(query) {
-  const res = await fetch(`${API_URL}?${query}`);
-  return res.json();
+async function apiGet(q) {
+  const r = await fetch(API_URL + "?" + q);
+  return r.json();
 }
 
 async function apiPost(data) {
-  const res = await fetch(API_URL, {
+  const r = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
-  return res.json();
+  return r.json();
 }
-
-/* ================= VISTAS ================= */
 
 async function vistaNueva() {
   const lugares = await apiGet("accion=lugares");
-  const deficiencias = await apiGet("accion=deficiencias");
+  const def = await apiGet("accion=deficiencias");
 
   vista.innerHTML = `
     <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
-
     <form onsubmit="crearOrden(event)" class="grid gap-3 md:grid-cols-2">
       <input id="nombre" class="input" placeholder="Nombre">
-
-      <select id="lugar" class="input">
-        ${lugares.map(l => `<option>${l}</option>`).join("")}
-      </select>
-
+      <select id="lugar" class="input">${lugares.map(x => `<option>${x}</option>`).join("")}</select>
       <input id="obs_lugar" class="input" placeholder="Observaciones lugar">
-
-      <select id="deficiencia" class="input">
-        ${deficiencias.map(d => `<option>${d}</option>`).join("")}
-      </select>
-
+      <select id="deficiencia" class="input">${def.map(x => `<option>${x}</option>`).join("")}</select>
       <input id="obs_def" class="input" placeholder="Observaciones deficiencia">
-
       <select id="estado" class="input">
         <option>Pendiente</option>
         <option>Realizada</option>
       </select>
-
-      <button class="btn md:col-span-2">Guardar orden</button>
+      <button class="btn md:col-span-2">Guardar</button>
     </form>
   `;
 }
 
 async function crearOrden(e) {
   e.preventDefault();
-
-  const resp = await apiPost({
+  const r = await apiPost({
     accion: "crear",
     nombre: nombre.value,
     lugar: lugar.value,
@@ -109,50 +85,36 @@ async function crearOrden(e) {
     obs_deficiencia: obs_def.value,
     estado: estado.value
   });
-
-  vista.innerHTML = `
-    <p class="text-green-600 font-bold">
-      ✅ Orden creada correctamente<br>
-      Nº de orden: ${resp.orden}
-    </p>
-  `;
+  vista.innerHTML = "<p class='text-green-600 font-bold'>✅ Orden creada. Nº " + r.orden + "</p>";
 }
 
 function vistaConsulta() {
   vista.innerHTML = `
-    <h2 class="text-xl font-bold mb-4">🔍 Consulta de orden</h2>
-
-    <input id="buscar" class="input mb-3" placeholder="Número de orden">
-    <button onclick="buscarOrden()" class="btn">Buscar</button>
-
+    <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
+    <input id="buscar" class="input mb-3" placeholder="Nº de orden">
+    <button class="btn" onclick="buscarOrden()">Buscar</button>
     <div id="resultado" class="mt-4"></div>
   `;
 }
 
 async function buscarOrden() {
-  const res = await apiGet(`accion=buscar&orden=${buscar.value}`);
-  resultado.innerHTML = res.error ? res.error : pintar(res);
+  const r = await apiGet("accion=buscar&orden=" + buscar.value);
+  resultado.innerHTML = r.error || pintar(r);
 }
 
 async function vistaLista(estado) {
-  const datos = await apiGet("accion=listar");
-  const filtrado = datos.filter(o => o.estado === estado);
-
-  vista.innerHTML = `
-    <h2 class="text-xl font-bold mb-4">${estado}</h2>
-    <button onclick="window.print()" class="btn mb-4">🖨️ Imprimir</button>
-    ${filtrado.length ? filtrado.map(pintar).join("") : "No hay datos"}
-  `;
+  const d = await apiGet("accion=listar");
+  vista.innerHTML = d.filter(o => o.estado === estado).map(pintar).join("") || "No hay datos";
 }
 
 function pintar(o) {
   return `
     <div class="mb-4 p-4 bg-indigo-50 rounded border-l-4 border-indigo-600">
       <p class="font-bold">🧾 Orden ${o.orden}</p>
-      <p>👤 ${o.nombre || "-"}</p>
-      <p>📍 ${o.lugar || "-"}</p>
-      <p>⚠️ ${o.deficiencia || "-"}</p>
-      <p><em>${o.estado}</em></p>
+      <p>${o.nombre || "-"}</p>
+      <p>${o.lugar || "-"}</p>
+      <p>${o.deficiencia || "-"}</p>
+      <p>${o.estado}</p>
     </div>
   `;
 }
@@ -165,8 +127,8 @@ function pintar(o) {
   border-radius: 14px;
   box-shadow: 0 4px 10px rgba(0,0,0,.1);
   font-weight: 600;
-  text-align: center;
   cursor: pointer;
+  text-align: center;
 }
 .input {
   border: 1px solid #ccc;
@@ -183,4 +145,3 @@ function pintar(o) {
 
 </body>
 </html>
-``
