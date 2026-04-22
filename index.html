@@ -5,7 +5,7 @@
   <title>Gestión de Órdenes de Trabajo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ✅ Tailwind -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -13,12 +13,11 @@
 
 <div class="max-w-6xl mx-auto">
 
-  <!-- TÍTULO -->
   <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-indigo-700">
     🛠️ Gestión de Órdenes de Trabajo
   </h1>
 
-  <!-- BOTONERA -->
+  <!-- Botonera -->
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <button class="menu-btn" onclick="vistaNueva()">➕ Nueva</button>
     <button class="menu-btn" onclick="vistaConsulta()">🔍 Consulta</button>
@@ -26,7 +25,7 @@
     <button class="menu-btn" onclick="vistaHistorico()">📜 Histórico</button>
   </div>
 
-  <!-- CONTENIDO -->
+  <!-- Contenido -->
   <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
     <p class="text-center text-gray-400">
       Selecciona una opción del menú
@@ -36,160 +35,171 @@
 </div>
 
 <script>
-  /* ================= ESTADO LOCAL ================= */
+/* ================= CONFIG ================= */
 
-  let ordenes = [];
-  let contadorOrden = 1;
+// ✅ PON AQUÍ TU URL REAL DE APPS SCRIPT
+const API_URL = "PEGA_AQUI_TU_URL_DE_APPS_SCRIPT";
 
-  const vista = document.getElementById("vista");
+/* ================= UTILIDADES ================= */
 
-  /* ================= VISTAS ================= */
+async function apiGet(query) {
+  const res = await fetch(`${API_URL}?${query}`);
+  return res.json();
+}
 
-  function vistaNueva() {
-    vista.innerHTML = `
-      <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
+async function apiPost(data) {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+  return res.json();
+}
 
-      <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
+const vista = document.getElementById("vista");
 
-        <div>
-          <label class="block text-sm font-semibold mb-1">Nombre</label>
-          <input id="nombre" required class="input" placeholder="Nombre">
-        </div>
+/* ================= VISTAS ================= */
 
-        <div>
-          <label class="block text-sm font-semibold mb-1">Lugar</label>
-          <select id="lugar" class="input">
-            <option>Sala 1</option>
-            <option>Sala 2</option>
-            <option>Oficina</option>
-            <option>Almacén</option>
-          </select>
-        </div>
+async function vistaNueva() {
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
 
-        <div class="md:col-span-2">
-          <label class="block text-sm font-semibold mb-1">Deficiencia</label>
-          <select id="deficiencia" class="input">
-            <option>Iluminación</option>
-            <option>Humedad</option>
-            <option>Rotura</option>
-            <option>Fuga</option>
-          </select>
-        </div>
+    <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
 
-        <div>
-          <label class="block text-sm font-semibold mb-1">Estado</label>
-          <select id="estado" class="input">
-            <option>Pendiente</option>
-            <option>Realizada</option>
-          </select>
-        </div>
-
-        <div class="md:col-span-2">
-          <button class="btn w-full">
-            Guardar orden
-          </button>
-        </div>
-
-      </form>
-    `;
-  }
-
-  function guardarOrden(e) {
-    e.preventDefault();
-
-    const orden = {
-      id: contadorOrden++,
-      nombre: nombre.value,
-      lugar: lugar.value,
-      deficiencia: deficiencia.value,
-      estado: estado.value
-    };
-
-    ordenes.push(orden);
-
-    vista.innerHTML = `
-      <p class="text-green-600 font-bold">
-        ✅ Orden creada correctamente<br>
-        Nº de orden: ${orden.id}
-      </p>
-    `;
-  }
-
-  function vistaConsulta() {
-    vista.innerHTML = `
-      <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
-      <p class="text-gray-600">
-        (En el siguiente paso conectaremos con los datos reales)
-      </p>
-    `;
-  }
-
-  function vistaPendientes() {
-    const pendientes = ordenes.filter(o => o.estado === "Pendiente");
-
-    vista.innerHTML = `
-      <h2 class="text-xl font-bold mb-4">⏳ Órdenes pendientes</h2>
-      ${
-        pendientes.length
-          ? pendientes.map(pintarOrden).join("")
-          : "<p class='text-gray-500'>No hay órdenes pendientes</p>"
-      }
-    `;
-  }
-
-  function vistaHistorico() {
-    const realizadas = ordenes.filter(o => o.estado === "Realizada");
-
-    vista.innerHTML = `
-      <h2 class="text-xl font-bold mb-4">📜 Histórico</h2>
-      ${
-        realizadas.length
-          ? realizadas.map(pintarOrden).join("")
-          : "<p class='text-gray-500'>No hay órdenes realizadas</p>"
-      }
-    `;
-  }
-
-  function pintarOrden(o) {
-    return `
-      <div class="mb-3 p-4 bg-indigo-50 rounded border-l-4 border-indigo-600">
-        <p class="font-bold">🧾 Orden ${o.id}</p>
-        <p>👤 ${o.nombre}</p>
-        <p>📍 ${o.lugar}</p>
-        <p>⚠️ ${o.deficiencia}</p>
-        <p><em>${o.estado}</em></p>
+      <div>
+        <label class="block text-sm font-semibold mb-1">Nombre</label>
+        <input id="nombre" required class="input">
       </div>
-    `;
-  }
+
+      <div>
+        <label class="block text-sm font-semibold mb-1">Lugar</label>
+        <select id="lugar" class="input">
+          <option>Sala 1</option>
+          <option>Sala 2</option>
+          <option>Oficina</option>
+          <option>Almacén</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm font-semibold mb-1">Deficiencia</label>
+        <select id="deficiencia" class="input">
+          <option>Iluminación</option>
+          <option>Humedad</option>
+          <option>Rotura</option>
+          <option>Fuga</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold mb-1">Estado</label>
+        <select id="estado" class="input">
+          <option>Pendiente</option>
+          <option>Realizada</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button class="btn w-full">Guardar orden</button>
+      </div>
+
+    </form>
+  `;
+}
+
+async function guardarOrden(e) {
+  e.preventDefault();
+
+  const r = await apiPost({
+    accion: "crear",
+    nombre: nombre.value,
+    lugar: lugar.value,
+    deficiencia: deficiencia.value,
+    estado: estado.value
+  });
+
+  vista.innerHTML = `
+    <p class="text-green-600 font-bold">
+      ✅ Orden creada correctamente<br>
+      Nº de orden: ${r.orden}
+    </p>
+  `;
+}
+
+async function vistaPendientes() {
+  const datos = await apiGet("accion=listar");
+  const pendientes = datos.filter(o => o.estado === "Pendiente");
+
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">⏳ Órdenes pendientes</h2>
+    ${
+      pendientes.length
+        ? pendientes.map(pintarOrden).join("")
+        : "<p class='text-gray-500'>No hay órdenes pendientes</p>"
+    }
+  `;
+}
+
+async function vistaHistorico() {
+  const datos = await apiGet("accion=listar");
+  const realizadas = datos.filter(o => o.estado === "Realizada");
+
+  vista.innerHTML = `
+    <h2 class="text-xl font-bold mb-4">📜 Histórico</h2>
+    ${
+      realizadas.length
+        ? realizadas.map(pintarOrden).join("")
+        : "<p class='text-gray-500'>No hay órdenes realizadas</p>"
+    }
+  `;
+}
+
+function vistaConsulta() {
+  vista.innerHTML = `
+    <p class="text-gray-600">La consulta individual la añadimos en el siguiente paso.</p>
+  `;
+}
+
+function pintarOrden(o) {
+  return `
+    <div class="mb-3 p-4 bg-indigo-50 rounded border-l-4 border-indigo-600">
+      <p class="font-bold">🧾 Orden ${o.orden}</p>
+      <p>👤 ${o.nombre}</p>
+      <p>📍 ${o.lugar}</p>
+      <p>⚠️ ${o.deficiencia}</p>
+      <p><em>${o.estado}</em></p>
+    </div>
+  `;
+}
 </script>
 
 <style>
-  .menu-btn {
-    background: white;
-    padding: 14px;
-    border-radius: 12px;
-    font-weight: 600;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,.1);
-    transition: transform .15s, box-shadow .15s;
-  }
-  .menu-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,.15);
-  }
-  .input {
-    width: 100%;
-    border: 1px solid #ccc;
-    padding: 8px;
-    border-radius: 8px;
-  }
-  .btn {
-    background: #4f46e5;
-    color: white;
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: 600;
-  }
+.menu-btn {
+  background: white;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,.1);
+  transition: transform .15s, box-shadow .15s;
+}
+.menu-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+}
+.input {
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 8px;
+}
+.btn {
+  background: #4f46e5;
+  color: white;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
 </style>
 
 </body>
