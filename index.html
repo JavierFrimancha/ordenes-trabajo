@@ -11,87 +11,186 @@
 
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
 
-  <div class="max-w-6xl mx-auto">
+<div class="max-w-6xl mx-auto">
 
-    <!-- TÍTULO -->
-    <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-indigo-700">
-      🛠️ Gestión de Órdenes de Trabajo
-    </h1>
+  <!-- TÍTULO -->
+  <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-indigo-700">
+    🛠️ Gestión de Órdenes de Trabajo
+  </h1>
 
-    <!-- BOTONERA -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <button class="menu-btn" onclick="vistaNueva()">➕ Nueva</button>
-      <button class="menu-btn" onclick="vistaConsulta()">🔍 Consulta</button>
-      <button class="menu-btn" onclick="vistaPendientes()">⏳ Pendientes</button>
-      <button class="menu-btn" onclick="vistaHistorico()">📜 Histórico</button>
-    </div>
-
-    <!-- CONTENIDO CENTRAL -->
-    <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
-      <p class="text-gray-400 text-center">
-        Selecciona una opción del menú
-      </p>
-    </div>
-
+  <!-- BOTONERA -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <button class="menu-btn" onclick="vistaNueva()">➕ Nueva</button>
+    <button class="menu-btn" onclick="vistaConsulta()">🔍 Consulta</button>
+    <button class="menu-btn" onclick="vistaPendientes()">⏳ Pendientes</button>
+    <button class="menu-btn" onclick="vistaHistorico()">📜 Histórico</button>
   </div>
 
-  <!-- LOGICA JS BÁSICA -->
-  <script>
-    const vista = document.getElementById("vista");
+  <!-- CONTENIDO -->
+  <div id="vista" class="bg-white rounded-xl shadow-xl p-6 min-h-[300px]">
+    <p class="text-center text-gray-400">
+      Selecciona una opción del menú
+    </p>
+  </div>
 
-    function vistaNueva() {
-      vista.innerHTML = `
-        <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
-        <p class="text-gray-600">
-          Aquí irá el formulario de creación de órdenes.
-        </p>
-      `;
-    }
+</div>
 
-    function vistaConsulta() {
-      vista.innerHTML = `
-        <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
-        <p class="text-gray-600">
-          Aquí se consultarán órdenes existentes.
-        </p>
-      `;
-    }
+<script>
+  /* ================= ESTADO LOCAL ================= */
 
-    function vistaPendientes() {
-      vista.innerHTML = `
-        <h2 class="text-xl font-bold mb-4">⏳ Órdenes pendientes</h2>
-        <p class="text-gray-600">
-          Aquí aparecerá el listado de órdenes pendientes.
-        </p>
-      `;
-    }
+  let ordenes = [];
+  let contadorOrden = 1;
 
-    function vistaHistorico() {
-      vista.innerHTML = `
-        <h2 class="text-xl font-bold mb-4">📜 Histórico</h2>
-        <p class="text-gray-600">
-          Aquí se mostrará el histórico de órdenes realizadas.
-        </p>
-      `;
-    }
-  </script>
+  const vista = document.getElementById("vista");
 
-  <!-- ESTILOS AUXILIARES -->
-  <style>
-    .menu-btn {
-      background: white;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 600;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,.1);
-      transition: transform .15s, box-shadow .15s;
-    }
-    .menu-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(0,0,0,.15);
-    }
-  </style>
+  /* ================= VISTAS ================= */
+
+  function vistaNueva() {
+    vista.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">➕ Nueva orden</h2>
+
+      <form onsubmit="guardarOrden(event)" class="grid gap-4 md:grid-cols-2">
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Nombre</label>
+          <input id="nombre" required class="input" placeholder="Nombre">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Lugar</label>
+          <select id="lugar" class="input">
+            <option>Sala 1</option>
+            <option>Sala 2</option>
+            <option>Oficina</option>
+            <option>Almacén</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-semibold mb-1">Deficiencia</label>
+          <select id="deficiencia" class="input">
+            <option>Iluminación</option>
+            <option>Humedad</option>
+            <option>Rotura</option>
+            <option>Fuga</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold mb-1">Estado</label>
+          <select id="estado" class="input">
+            <option>Pendiente</option>
+            <option>Realizada</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <button class="btn w-full">
+            Guardar orden
+          </button>
+        </div>
+
+      </form>
+    `;
+  }
+
+  function guardarOrden(e) {
+    e.preventDefault();
+
+    const orden = {
+      id: contadorOrden++,
+      nombre: nombre.value,
+      lugar: lugar.value,
+      deficiencia: deficiencia.value,
+      estado: estado.value
+    };
+
+    ordenes.push(orden);
+
+    vista.innerHTML = `
+      <p class="text-green-600 font-bold">
+        ✅ Orden creada correctamente<br>
+        Nº de orden: ${orden.id}
+      </p>
+    `;
+  }
+
+  function vistaConsulta() {
+    vista.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">🔍 Consulta</h2>
+      <p class="text-gray-600">
+        (En el siguiente paso conectaremos con los datos reales)
+      </p>
+    `;
+  }
+
+  function vistaPendientes() {
+    const pendientes = ordenes.filter(o => o.estado === "Pendiente");
+
+    vista.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">⏳ Órdenes pendientes</h2>
+      ${
+        pendientes.length
+          ? pendientes.map(pintarOrden).join("")
+          : "<p class='text-gray-500'>No hay órdenes pendientes</p>"
+      }
+    `;
+  }
+
+  function vistaHistorico() {
+    const realizadas = ordenes.filter(o => o.estado === "Realizada");
+
+    vista.innerHTML = `
+      <h2 class="text-xl font-bold mb-4">📜 Histórico</h2>
+      ${
+        realizadas.length
+          ? realizadas.map(pintarOrden).join("")
+          : "<p class='text-gray-500'>No hay órdenes realizadas</p>"
+      }
+    `;
+  }
+
+  function pintarOrden(o) {
+    return `
+      <div class="mb-3 p-4 bg-indigo-50 rounded border-l-4 border-indigo-600">
+        <p class="font-bold">🧾 Orden ${o.id}</p>
+        <p>👤 ${o.nombre}</p>
+        <p>📍 ${o.lugar}</p>
+        <p>⚠️ ${o.deficiencia}</p>
+        <p><em>${o.estado}</em></p>
+      </div>
+    `;
+  }
+</script>
+
+<style>
+  .menu-btn {
+    background: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,.1);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .menu-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.15);
+  }
+  .input {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .btn {
+    background: #4f46e5;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+</style>
 
 </body>
 </html>
